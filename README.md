@@ -22,7 +22,7 @@ probability(0.1);
 // under the hood
 \Antikirra\Probability\Probability::probability(0.2);
 ```
-
+final 
 ## Demo
 
 ```php
