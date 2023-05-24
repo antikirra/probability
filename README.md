@@ -2,7 +2,7 @@
 
 ## Install
 
-```bash
+```console
 composer require antikirra/probability
 ```
 
