@@ -19,17 +19,17 @@ function probability($probability, $key = '')
         throw new InvalidArgumentException();
     }
 
-    if ($probability === 0.0) {
+    if ($probability === 0.0 || $probability <= 0.000001) {
         return false;
     }
 
-    if ($probability === 1.0) {
+    if ($probability === 1.0 || $probability >= 0.999999) {
         return true;
     }
 
     if ($key === '') {
-        return mt_rand(0, 1e8) / 1e8 <= $probability;
+        return mt_rand(0, 1e6) / 1e6 <= $probability;
     }
 
-    return hexdec(substr(sha1($key), 0, 8)) / 4294967295 <= $probability;
+    return crc32($key) / 4294967295 <= $probability;
 }
