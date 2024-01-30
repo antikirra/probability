@@ -27,9 +27,7 @@ function probability($probability, $key = '')
         return true;
     }
 
-    if ($key === '') {
-        return mt_rand(0, 1e6) / 1e6 <= $probability;
-    }
+    $value = $key === '' ? mt_rand(0, 4294967295) : crc32($key);
 
-    return crc32($key) / 4294967295 <= $probability;
+    return $value / 4294967295 <= $probability;
 }
