@@ -50,8 +50,29 @@ if (probability(0.15, $_SERVER['REMOTE_ADDR'])) { // or probability(0.15, (strin
 }
 ```
 
+This example vividly illustrates the working principle of the mechanism, but it has a flaw in practice. The issue is
+that the function's parameter combinations will always return the same value, and different features will be enabled for
+the same users. To overcome this behavior, you will need to customize the key parameter, making it unique for each
+specific feature. This way, each experiment will be randomly conducted on a different group of users.
+
+```php
+<?php
+
+use function Antikirra\probability;
+
+require __DIR__ . '/vendor/autoload.php';
+
+if (probability(0.15, 'feature_#1337_for' . $_SERVER['REMOTE_ADDR'])) {
+    $app->feature('#1337')->enable();
+}
+
+if (probability(0.15, 'feature_#2517_for' . $_SERVER['REMOTE_ADDR'])) {
+    $app->feature('#2517')->enable();
+}
+```
+
 Remember that significant results can only be observed with a truly large amount of data or over a prolonged period of
 time. Use this approach wisely and assess the risks associated with its use. If you still have doubts, conduct simple
-synthetic testing of this functionality to understand its mechanics. 
+synthetic testing of this functionality to understand its mechanics.
 
 Good Luck!
