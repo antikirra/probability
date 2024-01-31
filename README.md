@@ -3,7 +3,7 @@
 ## Install
 
 ```console
-composer require antikirra/probability
+composer require antikirra/probability:^2.0
 ```
 
 ## Basic usage
