@@ -1,11 +1,12 @@
 # Make your code work spontaneously 🙃
+
 ![Packagist Dependency Version](https://img.shields.io/packagist/dependency-v/antikirra/probability/php)
 ![Packagist Version](https://img.shields.io/packagist/v/antikirra/probability)
 
 ## Install
 
 ```console
-composer require antikirra/probability:^2.0
+composer require antikirra/probability:^2
 ```
 
 ## Basic usage
