@@ -3,79 +3,130 @@
 ![Packagist Dependency Version](https://img.shields.io/packagist/dependency-v/antikirra/probability/php)
 ![Packagist Version](https://img.shields.io/packagist/v/antikirra/probability)
 
+A lightweight PHP library for probabilistic code execution and deterministic feature distribution. Perfect for A/B testing, gradual feature rollouts, performance sampling, and controlled chaos engineering.
+
 ## Install
 
 ```console
 composer require antikirra/probability:^2
 ```
 
-## Basic usage
+## 🚀 Key Features
 
-There are two main strategies for using this mechanism. You can use `probability` function call to predictably
-influence the probability of activating certain events. For example, when dealing with a high number of requests per
-second, logging all of them can be costly. Instead, you can choose to collect only 15% (selected randomly) of the
-incoming traffic to monitor the system's state.
+- **Zero Dependencies** - Pure PHP implementation
+- **Deterministic Distribution** - Consistent results for the same input keys
+- **High Performance** - Minimal overhead, suitable for high-traffic applications
+- **Simple API** - Just one function with intuitive parameters
+- **Battle-tested** - Production-ready with predictable behavior at scale
 
-```php
-<?php
+## 💡 Use Cases
 
-use function Antikirra\probability;
+- **Performance Sampling** - Log only a fraction of requests to reduce storage costs while maintaining system visibility. Sample database queries, API calls, or user interactions for performance monitoring without overwhelming your logging infrastructure.
 
-require __DIR__ . '/vendor/autoload.php';
+- **A/B Testing** - Run controlled experiments with consistent user experience. Test new features, UI changes, or algorithms on a specific percentage of users while ensuring each user always sees the same variant throughout their session.
 
-if (probability(0.15)) {
-    $logger->info($payload);
-}
-```
+- **Feature Flags** - Gradually roll out new features with fine-grained control. Start with a small percentage of users and increase over time, or enable features for specific user segments based on subscription tiers or other criteria.
 
-That's amazing! However, with this usage, we don't have guarantees of absolute stability. In other words, with a small
-number of iterations, it may appear that the algorithm is not working correctly. In reality, by running synthetic tests,
-you can see that for 1000 iterations, you may get 142, 153, or 165 positive activations. But there's no need to worry
-because with a truly large number of repetitions, the uniform distribution will do its job. This fact should always be
-kept in mind!
+- **Chaos Engineering** - Test system resilience by introducing controlled failures. Simulate random delays, service outages, or cache misses to ensure your application handles edge cases gracefully in production.
 
-To achieve a balance between stable operation and a desired level of probability distribution, such as in the case of
-conducting A/B testing for a new feature on your website, you can use a distinguishing user attribute, such as an
-identifier or IP address, to set the required level of distribution and bind it to that parameter. On average, only 15%
-of your website's audience will see the changes. When you make subsequent function calls for the same user, it will
-return the same value in each subsequent iteration. This is very convenient because it allows you to avoid the need for
-storing and rebalancing feature rollout lists.
+- **Rate Limiting** - Implement soft rate limits without additional infrastructure. Control access to expensive operations or API endpoints based on user tiers, preventing abuse while maintaining a smooth experience for legitimate users.
 
-```php
-<?php
+- **Load Balancing** - Distribute traffic across different backend services or database replicas probabilistically, achieving simple load distribution without complex routing rules.
 
-use function Antikirra\probability;
+- **Canary Deployments** - Route a small percentage of traffic to new application versions or infrastructure, monitoring for issues before full rollout.
 
-require __DIR__ . '/vendor/autoload.php';
+- **Analytics Sampling** - Reduce analytics data volume and costs by tracking only a representative sample of events while maintaining statistical significance.
 
-if (probability(0.15, $_SERVER['REMOTE_ADDR'])) { // or probability(0.15, (string)$userId)
-    $app->feature('#1337')->enable();
-}
-```
+- **Content Variation** - Test different content strategies, email templates, or notification messages to optimize engagement metrics.
 
-This example vividly illustrates the working principle of the mechanism, but it has a flaw in practice. The issue is
-that the function's parameter combinations will always return the same value, and different features will be enabled for
-the same users. To overcome this behavior, you will need to customize the key parameter, making it unique for each
-specific feature. This way, each experiment will be randomly conducted on a different group of users.
+- **Resource Optimization** - Selectively enable resource-intensive features like real-time updates, advanced search, or AI-powered suggestions based on server load or user priority.
+
+## 🔬 How It Works
+
+The library uses two strategies for probability calculation:
+
+### 1. Pure Random (No Key)
+When called without a key, uses PHP's random number generator for true randomness:
 
 ```php
-<?php
-
-use function Antikirra\probability;
-
-require __DIR__ . '/vendor/autoload.php';
-
-if (probability(0.15, 'feature_#1337_for' . $_SERVER['REMOTE_ADDR'])) {
-    $app->feature('#1337')->enable();
-}
-
-if (probability(0.15, 'feature_#2517_for' . $_SERVER['REMOTE_ADDR'])) {
-    $app->feature('#2517')->enable();
-}
+probability(0.25); // 25% chance, different result each time
 ```
 
-Remember that significant results can only be observed with a truly large amount of data or over a prolonged period of
-time. Use this approach wisely and assess the risks associated with its use. If you still have doubts, conduct simple
-synthetic testing of this functionality to understand its mechanics.
+### 2. Deterministic (With Key)
+When provided with a key, uses a hash-based approach for consistent results:
 
-Good Luck!
+```php
+probability(0.25, 'unique_key'); // Same result for same key
+```
+
+The deterministic approach ensures:
+- Same input always produces same output
+- Uniform distribution across large datasets
+- No need for external storage or coordination
+
+## 📖 API Reference
+
+```php
+function probability(float $probability, string $key = ''): bool
+```
+
+### Parameters
+
+- **`$probability`** *(float)*: A value between 0.0 and 1.0
+    - `0.0` = Never returns true (0% chance)
+    - `0.5` = Returns true half the time (50% chance)
+    - `1.0` = Always returns true (100% chance)
+
+- **`$key`** *(string|null)*: Optional. When provided, ensures deterministic behavior
+    - Same key always produces same result
+    - Different keys distribute uniformly
+
+### Returns
+
+- **`bool`**: `true` if the event should occur, `false` otherwise
+
+### Examples
+
+```php
+// 15% random chance
+probability(0.15);
+
+// Deterministic 30% for user with id 123
+probability(0.30, "user_123");
+
+// Combining feature and user for unique distribution
+probability(0.25, "feature_checkout_user_123");
+```
+
+## 🎯 Best Practices
+
+### 1. Use Meaningful Keys
+
+```php
+// ❌ Bad - too generic
+probability(0.5, "test");
+
+// ✅ Good - specific and unique
+probability(0.5, "homepage_redesign_user_$userId");
+```
+
+### 2. Separate Features
+
+```php
+// ❌ Bad - same users get all features
+if (probability(0.2, $userId)) { /* feature A */ }
+if (probability(0.2, $userId)) { /* feature B */ }
+
+// ✅ Good - different user groups per feature
+if (probability(0.2, "feature_a_$userId")) { /* feature A */ }
+if (probability(0.2, "feature_b_$userId")) { /* feature B */ }
+```
+
+### 3. Consider Scale
+
+```php
+// For high-frequency operations, use very small probabilities
+if (probability(0.001)) { // 0.1% - suitable for millions of requests
+    $metrics->record($data);
+}
+```
