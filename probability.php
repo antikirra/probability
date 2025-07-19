@@ -33,4 +33,3 @@ function probability($probability, $key = '')
 
     return ($key === '' ? mt_rand(0, 4294967295) : hash('crc32b', $key)) / 4294967295 <= $probability;
 }
-
