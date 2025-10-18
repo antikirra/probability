@@ -4,6 +4,11 @@ namespace Antikirra;
 
 use InvalidArgumentException;
 
+// Constants for probability calculations
+const MAX_UINT32 = 4294967295;
+const EPSILON_LOWER = 0.000001;
+const EPSILON_UPPER = 0.999999;
+
 /**
  * @param float $probability
  * @param string $key
@@ -11,25 +16,23 @@ use InvalidArgumentException;
  */
 function probability($probability, $key = '')
 {
-    if (!is_float($probability)) {
-        throw new InvalidArgumentException('Probability must be a float value');
-    }
-
-    if (!is_string($key)) {
-        throw new InvalidArgumentException('Key must be a string value');
-    }
-
+    // Validate probability range (type coercion handles int/float)
     if ($probability < 0.0 || $probability > 1.0) {
         throw new InvalidArgumentException('Probability must be between 0.0 and 1.0, got: ' . $probability);
     }
 
-    if ($probability === 0.0 || $probability <= 0.000001) {
+    // Fast path for edge cases
+    if ($probability <= EPSILON_LOWER) {
         return false;
     }
 
-    if ($probability === 1.0 || $probability >= 0.999999) {
+    if ($probability >= EPSILON_UPPER) {
         return true;
     }
 
-    return ($key === '' ? mt_rand(0, 4294967295) : hash('crc32b', $key)) / 4294967295 <= $probability;
+    // Use crc32 for deterministic hashing (faster than hash('crc32b'))
+    // Convert to unsigned 32-bit integer using bitwise AND
+    $random = $key === '' ? mt_rand(0, MAX_UINT32) : (crc32($key) & 0xFFFFFFFF);
+
+    return $random / MAX_UINT32 <= $probability;
 }
