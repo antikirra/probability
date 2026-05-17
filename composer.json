@@ -1,24 +1,38 @@
 {
   "name": "antikirra/probability",
-  "minimum-stability": "dev",
+  "description": "Lightweight PHP micro-library for probabilistic and deterministic code execution — feature flags, A/B testing, gradual rollouts and sampling.",
   "type": "library",
+  "keywords": [
+    "probability",
+    "feature-flag",
+    "ab-testing",
+    "rollout",
+    "sampling",
+    "random",
+    "chaos-engineering",
+    "canary"
+  ],
   "license": "MIT",
-  "autoload": {
-    "psr-4": {
-      "Antikirra\\": ""
-    },
-    "files": [
-      "probability.php"
-    ]
-  },
   "authors": [
     {
       "name": "Kirill Tkachenko",
       "email": "antikirra@gmail.com"
     }
   ],
+  "support": {
+    "issues": "https://github.com/antikirra/probability/issues",
+    "source": "https://github.com/antikirra/probability"
+  },
   "require": {
-    "php": "^5.6 || ^7.0 || ^8.0"
+    "php": "^8.2"
+  },
+  "require-dev": {
+    "pestphp/pest": "^4.0"
+  },
+  "autoload": {
+    "files": [
+      "probability.php"
+    ]
   },
   "config": {
     "sort-packages": true,
@@ -26,7 +40,7 @@
       "pestphp/pest-plugin": true
     }
   },
-  "require-dev": {
-    "pestphp/pest": "4.x-dev"
+  "scripts": {
+    "test": "pest"
   }
 }

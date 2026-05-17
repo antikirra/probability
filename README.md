@@ -29,8 +29,10 @@ if (probability(0.1, "feature_ai_search_user_{$userId}")) {
 ## Install
 
 ```console
-composer require antikirra/probability:^3.0
+composer require antikirra/probability:^4.0
 ```
+
+Requires **PHP 8.2 or newer**. Zero runtime dependencies.
 
 ## 🚀 Key Features
 
@@ -82,8 +84,8 @@ probability(0.25, 'unique_key'); // Same result for same key
 
 **Technical Details:**
 - Uses `crc32()` to hash the key into a 32-bit unsigned integer (0 to 4,294,967,295)
-- Normalizes the hash by dividing by `MAX_UINT32` (4294967295) to get a value between 0.0 and 1.0
-- Compares normalized value against the probability threshold
+- Normalizes the hash by dividing by the bucket count `2³²` (4,294,967,296) to get an unbiased value in `[0.0, 1.0)`
+- Compares the normalized value against the probability threshold
 - Same key → same hash → same normalized value → deterministic result
 
 The deterministic approach ensures:
@@ -105,9 +107,10 @@ function probability(float $probability, string $key = ''): bool
     - `0.5` = Returns true half the time (50% chance)
     - `1.0` = Always returns true (100% chance)
 
-- **`$key`** *(string|null)*: Optional. When provided, ensures deterministic behavior
+- **`$key`** *(string)*: Optional. When provided (non-empty), ensures deterministic behavior
     - Same key always produces same result
     - Different keys distribute uniformly
+    - An empty string (the default) falls back to random behavior
 
 ### Returns
 
@@ -298,12 +301,12 @@ Test coverage includes:
 
 ## ⚡ Performance
 
-Benchmarks on PHP 8.4 (Apple M4):
+Benchmarks on PHP 8.4 (Apple M4 Pro):
 
 | Operation | Time per call | Ops/sec |
 |-----------|--------------|---------|
-| Random (no key) | ~0.14 μs | ~7.0M |
-| Deterministic (with key) | ~0.16 μs | ~6.2M |
+| Random (no key) | ~0.12 μs | ~8.4M |
+| Deterministic (with key) | ~0.15 μs | ~6.7M |
 
 **Memory usage:** 0 bytes (no allocations)
 
